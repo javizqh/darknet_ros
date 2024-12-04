@@ -32,69 +32,6 @@ find_path(DARKNET_PATH
 message(STATUS "Darknet path dir = ${DARKNET_PATH}")
 add_definitions(-DDARKNET_FILE_PATH="${DARKNET_PATH}")
 
-# Find CUDA ====================================================================
-if(CUDA_ENABLE)
-  find_package(CUDA REQUIRED)
-endif()
-
-if (CUDA_FOUND)
-  message(STATUS "CUDA Version: ${CUDA_VERSION_STRINGS}")
-  message(STATUS "CUDA Libararies: ${CUDA_LIBRARIES}")
-  set(
-    CUDA_NVCC_FLAGS
-    ${CUDA_NVCC_FLAGS};
-    -O3
-    -gencode arch=compute_50,code=[sm_50,compute_50]
-    -gencode arch=compute_52,code=[sm_52,compute_52]
-    -gencode arch=compute_61,code=[sm_61,compute_61]
-    -gencode arch=compute_72,code=[sm_72,compute_72] # Jetson AGX Xavier or TITAN V
-    -gencode arch=compute_75,code=[sm_75,compute_75]
-    -gencode arch=compute_80,code=[sm_80,compute_80]
-    -gencode arch=compute_86,code=[sm_86,compute_86] # GeForce RTX 3000 Series
-    -gencode arch=compute_87,code=[sm_87,compute_87]
-  )
-  add_definitions(-DGPU)
-endif()
-
-# Find CUDNN =======================================================================
-
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../darknet/cmake/Modules/" ${CMAKE_MODULE_PATH})
-
-if(CUDNN_ENABLE)
-  find_package(CUDNN)
-  message(STATUS "cuDNN Version: ${CUDNN_VERSION_STRINGS}")
-  message(STATUS "cuDNN Libararies: ${CUDNN_LIBRARIES}")
-endif()
-
-if(CUDNN_FOUND)
-    set(ADDITIONAL_CXX_FLAGS "${ADDITIONAL_CXX_FLAGS} -DCUDNN")
-endif()
-
-execute_process (
-    COMMAND bash -c "lspci | grep NVIDIA | grep -e TU106 -e TU104 -e TU102 -e GA106 -e GA104 -e GA102"
-    OUTPUT_VARIABLE outVar
-)
-message ( STATUS " GPU (FP16): " ${outVar} )
-if(outVar AND FP16_ENABLE)
-  set(CMAKE_CUDA_ARCHITECTURES 75)
-endif()
-
-if ( 70 IN_LIST CMAKE_CUDA_ARCHITECTURES OR
-     72 IN_LIST CMAKE_CUDA_ARCHITECTURES OR
-     75 IN_LIST CMAKE_CUDA_ARCHITECTURES OR
-     80 IN_LIST CMAKE_CUDA_ARCHITECTURES OR
-     86 IN_LIST CMAKE_CUDA_ARCHITECTURES)
-  set(ENABLE_CUDNN_HALF "TRUE" CACHE BOOL "Enable CUDNN Half precision" FORCE)
-  message(STATUS "Your setup supports half precision (CUDA_ARCHITECTURES >= 70)")
-else()
-  set(ENABLE_CUDNN_HALF "FALSE" CACHE BOOL "Enable CUDNN Half precision" FORCE)
-  message(STATUS "Your setup does not support half precision (it requires CUDA_ARCHITECTURES >= 70)")
-endif()
-
-# else()
-#   list(APPEND LIBRARIES "m")
-# endif()
-
 # Find X11 ============================================================================
 message ( STATUS "Searching for X11..." )
 find_package ( X11 REQUIRED )
