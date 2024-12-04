@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 # USER SETTINGS =================================================================
 
-set(CUDA_ENABLE ON)
-set(CUDNN_ENABLE ON) #  set(CUDNN_ENABLE ON)
+set(CUDA_ENABLE OFF)
+set(CUDNN_ENABLE OFF) #  set(CUDNN_ENABLE ON)
 set(FP16_ENABLE ON)
 
 set(DOWNLOAD_YOLOV2_TINY OFF)
